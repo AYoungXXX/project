@@ -8,7 +8,7 @@ import 'package:untitled/data/source/local_iptv_loader.dart';
 import 'package:untitled/widget/tv_list_widget.dart';
 import 'package:untitled/widget/tv_play_widget.dart';
 
-import 'focuse_item.dart';
+import 'widget/focuse_item.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +47,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late final FocusNode focusNode = FocusNode();
+  final MainController controller = Get.find();
+  late final FocusNode focusNode = FocusNode(canRequestFocus: false);
 
   @override
   void initState() {
@@ -58,34 +59,60 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Obx(() {
-              var data = Get.find<MainController>().playData.value;
-              if (data == null) {
-                return const SizedBox.shrink();
+    return WillPopScope(
+      onWillPop: () {
+        return Future(() => false);
+      },
+      child: Scaffold(
+        body: KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          onKeyEvent: (KeyEvent keyEvent) {
+            print("接收的事件:$keyEvent");
+            if (keyEvent is KeyUpEvent) {
+              if (keyEvent.logicalKey.keyId ==
+                  LogicalKeyboardKey.goBack.keyId) {
+                print("隐藏列表");
+                controller.dismissTvList();
               }
-              return TvPlayWidget(
-                playData: data,
-                key: ValueKey(data.playUrl),
-              );
-            }),
+
+              if (keyEvent.logicalKey.keyId ==
+                      LogicalKeyboardKey.select.keyId &&
+                  controller.tvListShow.isFalse) {
+                print("显示列表");
+                controller.showTvList();
+              }
+            }
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Obx(() {
+                var data = controller.iptvData.value;
+                return TvListWidget(
+                    show: controller.tvListShow.value,
+                    data: data,
+                    onSelect: (IptvBean value) {
+                      if (controller.tvListShow.isTrue) {
+                        Get.find<MainController>().setPlayInfo(value);
+                      }
+                    });
+              }),
+              Expanded(
+                child: Obx(() {
+                  var data = controller.playData.value;
+                  if (data == null) {
+                    return const SizedBox.shrink();
+                  }
+                  return TvPlayWidget(
+                    playData: data,
+                    key: ValueKey(data.playUrl),
+                  );
+                }),
+              ),
+            ],
           ),
-          Positioned(
-            left: 0,
-            top: 0,
-            child: Obx(() {
-              var data = Get.find<MainController>().iptvData.value;
-              return TvListWidget(
-                  data: data,
-                  onSelect: (IptvBean value) {
-                    Get.find<MainController>().setPlayInfo(value);
-                  });
-            }),
-          ),
-        ],
+        ),
       ),
     );
   }

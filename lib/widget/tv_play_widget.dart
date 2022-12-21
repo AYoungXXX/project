@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:untitled/data/iptv_bean.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
@@ -27,9 +28,13 @@ class _TvPlayWidgetState extends State<TvPlayWidget> {
   @override
   Widget build(BuildContext context) {
     final playerWidget = VideoPlayer(videoPlayerController);
-    final size = MediaQuery.of(context).size;
-    return AspectRatio(
-        aspectRatio: size.width / size.height, child: playerWidget);
+
+    return LayoutBuilder(
+      builder: (ctx, layoutCons) => AspectRatio(
+        aspectRatio: 1920 / 1080,
+        child: playerWidget,
+      ),
+    );
   }
 
   @override

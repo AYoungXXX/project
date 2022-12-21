@@ -5,8 +5,9 @@ import 'package:flutter/services.dart';
 class FocusItem extends StatefulWidget {
   final Widget child;
   final Function()? onTap;
+  final Function(FocusNode focusNode)? onFocus;
 
-  const FocusItem({Key? key, required this.child, this.onTap})
+  const FocusItem({Key? key, required this.child, this.onTap, this.onFocus})
       : super(key: key);
 
   @override
@@ -22,6 +23,7 @@ class _FocusItemState extends State<FocusItem> {
     focusNode.addListener(() {
       setState(() {});
       if (focusNode.hasFocus) {
+        widget.onFocus?.call(focusNode);
         // print("当前获取焦点");
         var scrollable = Scrollable.of(context);
         // print("controller=${scrollable}");
