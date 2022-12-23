@@ -32,6 +32,22 @@ class MyAccessibilityService : AccessibilityService() {
                         ).show()
                     }
                 }
+                if (source.getChild(i)?.text?.contains("是否允许") == true) {
+                    Toast.makeText(
+                        baseContext,
+                        "收到事件22:${p0.eventType.let { AccessibilityEvent.obtain(it) }}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    if(source.findAccessibilityNodeInfosByText("允许").size>0){
+                        source.findAccessibilityNodeInfosByText("允许").last().performAction(
+                            ACTION_CLICK)
+                        Toast.makeText(
+                            baseContext,
+                            "收到事件:${p0.eventType.let { AccessibilityEvent.obtain(it) }}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
             }
         source.recycle()
     }
